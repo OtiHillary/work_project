@@ -5,10 +5,11 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import App from './App.vue'
+
 //import routes
 import login from './pages/Login.vue'
-import dashboard from './pages/Dashboard.vue'
-import Signup from './pages/signup.vue'
+import dashboard from './pages/dashboard/Dashboard.vue'
+import signup from './pages/Signup.vue'
 
 const router = createRouter({
    history: createWebHistory(),
@@ -16,7 +17,7 @@ const router = createRouter({
       { path: '/', component: dashboard },
       { path: '/dashboard', component: dashboard },
       { path: '/login', component: login },
-      { path: '/signup', component: Signup },
+      { path: '/signup', component: signup },
    ]
 })
 const app = createApp(App)
