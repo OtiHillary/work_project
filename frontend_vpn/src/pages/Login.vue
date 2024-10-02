@@ -3,28 +3,46 @@ export default {
    data() {
       return {
          formData: {
-            username: '',
+            email: '',
             password: ''
-         }
+         },
+         errorMessage: 'no message',
+         errorVisible: false
+
       }
    },
    methods: {
       changeForm(event) {
-         let tempFormdata = { ...formData, [event.target.name]: event.target.value }
+         console.log( this.formData );
+         
+         let tempFormdata = { ...this.formData, [event.target.name]: event.target.value }
          this.formData = tempFormdata
+         console.log(this.formData);
       },
       async signin(event) {
          event.preventDefault()
          console.log(`Signin in with data: ${ this.formData }, please wait...`)
 
-         const res = await fetch('http://localhost:3000/login-auth', {
-            method: 'POST',
-            headers: {
-               "Content-Type" : "application/json"
-            },
-            body: JSON.stringify(this.formData)
-         })
-         console.log(await res.json())
+         try {
+            const res = await fetch('http://localhost:3000/login-auth', {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               body: JSON.stringify(this.formData)
+            })
+
+            const user = await res.json()
+            console.log(user)  
+            localStorage.setItem('userData', user)
+            this.$router.push('/dashboard') 
+
+         } catch (error) {
+            console.log(error)
+            this.errorMessage = "login failed, try again"
+            this.errorVisible = true
+         }
+
       }  
    }
 }
@@ -34,11 +52,12 @@ export default {
    <div class="w-screen h-screen flex justify-center">
       <div class="bg-white p-8 rounded-lg shadow-lg w-full h-fit my-auto max-w-md">
          <h1 class="text-3xl font-semibold text-left mb-4">Login</h1>
+         <div v-if="errorVisible" class="border-red-400 border-l-4 text-red-400 bg-red-50 p-3 my-1">{{ errorMessage }}</div>
          
          <form @submit="signin">
             <div class="mb-4">
-               <label name="username" @change="changeForm" class="block text-gray-700 mb-2" for="email">Email or Username</label>
-               <input class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" type="text" id="email" placeholder="Enter your email or username">
+               <label class="block text-gray-700 mb-2" for="email">Email or Username</label>
+               <input name="email" @change="changeForm" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" type="email" id="email" placeholder="Enter your email or username">
             </div>
             <div class="mb-4">
                <label class="block text-gray-700 mb-2" for="password">Password</label>
