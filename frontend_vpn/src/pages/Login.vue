@@ -1,5 +1,12 @@
 <script>
 export default {
+   mounted() {
+      let storage = localStorage.getItem('userData')
+      if (storage) {
+         this.$router.push('/dashboard')
+      }
+   },
+   
    data() {
       return {
          formData: {

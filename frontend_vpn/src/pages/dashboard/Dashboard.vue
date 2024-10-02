@@ -4,6 +4,23 @@ import sidebar from './components/Sidebar.vue'
 import Topbar from './components/Topbar.vue'
 </script>
 
+<script type="module">
+export default {
+  mounted() {
+    let storage = localStorage.getItem('userData')
+    if (!storage) {
+      this.$router.push('/login')
+    }
+  },
+  methods: {
+    async logout() {
+      localStorage.removeItem('userData')
+      this.$router.push('/login')
+    }
+  }
+}
+</script>
+
 <template>
   <div class="flex flex-col md:flex-row h-screen w-screen" id="app">
    <!-- Sidebar -->
@@ -91,6 +108,10 @@ import Topbar from './components/Topbar.vue'
           </p>
           <button class="flex items-center px-6 py-2 my-3 w-fit bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600">
             Click me
+          </button>
+
+          <button @click="logout" class="flex items-center px-6 py-2 my-3 w-fit bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600">
+            logout test
           </button>
         </div>
       </div>

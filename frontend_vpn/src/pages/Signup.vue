@@ -1,5 +1,12 @@
 <script>
 export default {
+   mounted() {
+      let storage = localStorage.getItem('userData')
+      if (storage) {
+         this.$router.push('/dashboard')
+      }
+   },
+
    data() {
       return {
          formData: {
@@ -11,6 +18,7 @@ export default {
 
       }
    },
+   
    methods: {
       changeForm(event) {
          let tempFormdata = { ...this.formData, [event.target.name]: event.target.value }
