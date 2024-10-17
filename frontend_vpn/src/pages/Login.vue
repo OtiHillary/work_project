@@ -14,7 +14,8 @@ export default {
             password: ''
          },
          errorMessage: 'no message',
-         errorVisible: false
+         errorVisible: false,
+         loading: false,
 
       }
    },
@@ -26,9 +27,11 @@ export default {
          this.formData = tempFormdata
          console.log(this.formData);
       },
+
       async signin(event) {
          event.preventDefault()
          console.log(`Signin in with data: ${ this.formData }, please wait...`)
+         this.loading = true
 
          try {
             const res = await fetch('http://localhost:3000/login-auth', {
@@ -48,9 +51,10 @@ export default {
             console.log(error)
             this.errorMessage = "login failed, try again"
             this.errorVisible = true
+            this.loading = false
          }
 
-      }  
+      },
    }
 }
 </script>
@@ -80,7 +84,14 @@ export default {
                </label>
                <a href="#" class="text-purple-600 hover:underline">Forgot Password?</a>
             </div>
-            <button class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-200">Login</button>
+
+            <button v-if="loading" class="w-full bg-purple-400 text-white py-2 rounded-lg transition duration-200">
+               Loading...
+            </button>
+            <button v-else class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-200">
+               Login
+            </button>
+
          </form>
 
          <p class="text-center text-gray-600 mt-6">New on our platform? <a href="/signup" class="text-purple-600 hover:underline">Create an account</a></p>

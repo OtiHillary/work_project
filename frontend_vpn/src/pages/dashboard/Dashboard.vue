@@ -13,7 +13,7 @@ export default {
     }
   },
   methods: {
-    async logout() {
+    logout() {
       localStorage.removeItem('userData')
       this.$router.push('/login')
     }
