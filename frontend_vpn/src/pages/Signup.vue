@@ -14,7 +14,8 @@ export default {
             password: ''
          },
          errorMessage: 'no message',
-         errorVisible: false
+         errorVisible: false,
+         loading: false,
 
       }
    },
@@ -25,8 +26,10 @@ export default {
          this.formData = tempFormdata
          console.log(this.formData);
       },
+
       async signup(event) {
          event.preventDefault()
+         this.loading = true
 
          try {
             const res = await fetch('http://localhost:3000/signup-auth', {
@@ -46,6 +49,8 @@ export default {
             console.log(error)
             this.errorMessage = "login failed, try again"
             this.errorVisible = true
+            this.loading = false
+
          }
       }  
    }
@@ -56,7 +61,8 @@ export default {
    <div class="w-screen h-screen flex justify-center">
       <div class="bg-white p-8 rounded-lg shadow-lg w-full h-fit my-auto max-w-md">
          <h1 class="text-3xl font-semibold text-left mb-4">Sign Up</h1>
-         <div class="border-red-400 text-red-400 bg-red-50 p-4">{{ error.message }}</div>
+         <div v-if="errorVisible" class="border-red-400 text-red-400 bg-red-50 p-4">{{ errorMessage }}</div>
+
          <form @submit="signup">
             <div class="mb-4">
                <label class="block text-gray-700 mb-2" for="email">Email or Username</label>
@@ -75,7 +81,13 @@ export default {
                   <span class="ml-2 text-gray-700">Remember Me</span>
                </label>
             </div>
-            <button class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-200">Sign up</button>
+
+            <button v-if="loading" class="w-full bg-purple-400 text-white py-2 rounded-lg transition duration-200">
+               Loading...
+            </button>
+            <button v-else class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-200">
+               Sign up
+            </button>
          </form>
          <a class="text-purple-600 hover:underline" href="/login">I have an account</a>
       </div> 
