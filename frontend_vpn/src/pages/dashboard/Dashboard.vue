@@ -6,16 +6,49 @@ import Topbar from './components/Topbar.vue'
 
 <script type="module">
 export default {
+  data() {
+    return {
+      imageSrc: null
+    }
+  },
+
   mounted() {
     let storage = localStorage.getItem('userData')
     if (!storage) {
       this.$router.push('/login')
     }
+
+    console.log('mounted');
+    this.fetchData()
   },
+
   methods: {
     logout() {
       localStorage.removeItem('userData')
       this.$router.push('/login')
+    },
+
+    async fetchData(){
+      const res = await fetch("http://localhost:3000/fetch-data", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fileName: 'test.jpeg' })
+      })     
+
+      const blob = await res.blob();
+      this.imageSrc = URL.createObjectURL( blob);
+      console.log('the response is:', res)
+    },
+
+    async fetchConf() {
+      const link = document.createElement('a');
+      link.href = 'http://localhost:3000/download-conf'; // URL for the config file
+      link.download = 'config.conf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link)
     }
   }
 }
@@ -35,67 +68,12 @@ export default {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
       <!-- Image preview card -->
-        <div class="bg-purple-600 text-white p-6 rounded-lg shadow-md">
-          <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-xl font-bold">
-            Website Analytics
-            </h2>
-            <p class="text-sm">
-            Total 28.5% Conversion Rate
-            </p>
-          </div>
-          <div class="flex space-x-2">
-            <span class="w-2 h-2 bg-white rounded-full">
-            </span>
-            <span class="w-2 h-2 bg-white rounded-full opacity-50">
-            </span>
-            <span class="w-2 h-2 bg-white rounded-full opacity-50">
-            </span>
-          </div>
-          </div>
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm">
-                Spending
-              </p>
-
-              <div class="flex space-x-4 mt-2">
-                <div class="text-center">
-                  <p class="text-lg font-bold">
-                  12h
-                  </p>
-                  <p class="text-xs">
-                  Spend
-                  </p>
-                </div>
-                <div class="text-center">
-                  <p class="text-lg font-bold">
-                  18
-                  </p>
-                  <p class="text-xs">
-                  Order Size
-                  </p>
-                </div>
-                <div class="text-center">
-                  <p class="text-lg font-bold">
-                  127
-                  </p>
-                  <p class="text-xs">
-                  Order
-                  </p>
-                </div>
-                <div class="text-center">
-                  <p class="text-lg font-bold">
-                  2.3k
-                  </p>
-                  <p class="text-xs">
-                  Items
-                  </p>
-                </div>
-              </div>
+        <div class="flex justify-center bg-purple-600 text-white p-6 rounded-lg shadow-md">
+            <img v-if="imageSrc" :src="imageSrc" alt="Image from backend">
+            <div v-else class="flex flex-col justify-center">
+              <img src="/src/assets/loading.gif" alt="image from backend" class="w-8 h-8 m-auto">
+              <p class="font-bold">loading...</p>
             </div>
-          </div>
         </div>
 
       <!-- Download file-->
@@ -106,12 +84,8 @@ export default {
           <p class="text-sm text-gray-500 my-2">
             Download .conf file(s) here
           </p>
-          <button class="flex items-center px-6 py-2 my-3 w-fit bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600">
-            Click me
-          </button>
-
-          <button @click="logout" class="flex items-center px-6 py-2 my-3 w-fit bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600">
-            logout test
+          <button v-on:click="fetchConf" class="flex items-center px-6 py-2 my-3 w-fit bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600">
+            Download
           </button>
         </div>
       </div>
@@ -119,16 +93,3 @@ export default {
   </div>
 </template>
 
-<!-- <script>
-export default {
-  data() {
-    return {
-      sidebarItems: [
-        { text: 'Dashboard', href: '#' },
-        { text: 'Settings', href: '#' },
-        { text: 'Help', href: '#' },
-      ],
-   };
-  },
-};
-</script> -->
