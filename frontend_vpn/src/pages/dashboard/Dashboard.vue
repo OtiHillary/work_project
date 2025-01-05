@@ -8,33 +8,38 @@ import Topbar from './components/Topbar.vue'
 export default {
   data() {
     return {
-      imageSrc: null
+      imageSrc: null,
+      showSidebar: false
     }
   },
 
   mounted() {
     let storage = localStorage.getItem('userData')
-    if (!storage) {
-      this.$router.push('/login')
-    }
+    
+    if (!storage) this.$router.push('/login')
 
     console.log('mounted');
-    this.fetchData()
+    this.fetchData(storage)
   },
 
   methods: {
+    toggleSidebar() {
+      this.showSidebar = !this.showSidebar;
+    },
+
     logout() {
       localStorage.removeItem('userData')
       this.$router.push('/login')
     },
 
-    async fetchData(){
-      const res = await fetch("http://localhost:3000/fetch-data", {
+    async fetchData(storageData){
+      console.log(storageData)
+      const res = await fetch("/api/fetch-data", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ fileName: 'test.jpeg' })
+        body: JSON.stringify({ token: storageData })
       })     
 
       const blob = await res.blob();
@@ -43,8 +48,9 @@ export default {
     },
 
     async fetchConf() {
+      const storageToken = localStorage.getItem('userData')
       const link = document.createElement('a');
-      link.href = 'http://localhost:3000/download-conf'; // URL for the config file
+      link.href = `/api/download-conf?tkn=${storageToken}`; // URL for the config file
       link.download = 'config.conf';
       document.body.appendChild(link);
       link.click();
@@ -56,13 +62,26 @@ export default {
 
 <template>
   <div class="flex flex-col md:flex-row h-screen w-screen" id="app">
-   <!-- Sidebar -->
-    <sidebar/>
+    <!-- Sidebar -->
+    <sidebar
+      :class="{
+        'fixed inset-0 bg-gray-800 z-50 transform transition-transform duration-300': true,
+        'translate-x-0': showSidebar,
+        '-translate-x-full': !showSidebar,
+        'md:translate-x-0 md:relative md:inset-auto md:bg-transparent md:z-auto': true,
+      }"
+    />
     
     <!-- Main Content -->
     <div class="flex-1 p-6 py-4">
       <!-- Top Bar -->
       <Topbar/>
+      <button
+          class="block md:hidden bg-purple-600 text-white p-2 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          @click="toggleSidebar"
+      >
+        <img src="https://static.vecteezy.com/system/resources/previews/021/190/402/non_2x/hamburger-menu-filled-icon-in-transparent-background-basic-app-and-web-ui-bold-line-icon-eps10-free-vector.jpg" alt="">    
+      </button>
 
       <!-- Dashboard Content -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

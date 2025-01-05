@@ -27,12 +27,23 @@ export default {
          console.log(this.formData);
       },
 
+      async redirectToGoogleOAuth() {
+         const clientId = '588057669834-i9aa7c62qqg7a7jqs5ugapf1lfoi883n.apps.googleusercontent.com';
+         const redirectUri = 'https://dashboard.techdispatch.us/api/auth/google/callback'; // Your backend callback
+         const scope = 'openid email profile';
+         const responseType = 'code';
+
+         const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+         
+         window.location.href = url;
+      },
+
       async signup(event) {
          event.preventDefault()
          this.loading = true
 
          try {
-            const res = await fetch('http://localhost:3000/signup-auth', {
+            const res = await fetch('http://135.148.24.68:3000/signup-auth', {
                method: 'POST',
                headers: {
                   'Content-Type': 'application/json',
@@ -40,14 +51,17 @@ export default {
                body: JSON.stringify(this.formData)
             })
 
+            if (!res.ok) {
+               throw new Error("Signup failed, try again")
+            }
+
             const user = await res.json()
             console.log(user)  
-            localStorage.setItem('userData', user)
-            this.$router.push('/dashboard') 
+            this.$router.push('/account-created') 
 
          } catch (error) {
             console.log(error)
-            this.errorMessage = "login failed, try again"
+            this.errorMessage = "signin failed, try again"
             this.errorVisible = true
             this.loading = false
 
@@ -89,6 +103,12 @@ export default {
                Sign up
             </button>
          </form>
+
+         <button @click="redirectToGoogleOAuth" class="flex justify-center items-center w-full px-4 py-2 my-2 bg-blue-400 text-white font-bold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
+            <img src="https://pluspng.com/img-png/google-logo-png-open-2000.png" alt="Google Logo" class="h-6 me-3"/>
+            Sign in with Google
+         </button>
+
          <a class="text-purple-600 hover:underline" href="/login">I have an account</a>
       </div> 
    </div>

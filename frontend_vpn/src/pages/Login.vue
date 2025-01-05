@@ -2,9 +2,18 @@
 export default {
    mounted() {
       let storage = localStorage.getItem('userData')
+      const token = new URLSearchParams(window.location.search).get('token');
+
+      fetch('http://135.148.24.68:3000/')
+      
       if (storage) {
          this.$router.push('/dashboard')
       }
+
+      if (token) {
+        localStorage.setItem('userData', token);
+        this.$router.push('/dashboard');
+    }
    },
    
    data() {
@@ -28,13 +37,24 @@ export default {
          console.log(this.formData);
       },
 
+      async redirectToGoogleOAuth() {
+         const clientId = '588057669834-i9aa7c62qqg7a7jqs5ugapf1lfoi883n.apps.googleusercontent.com';
+         const redirectUri = 'https://dashboard.techdispatch.us/api/auth/google/callback'; // Your backend callback
+         const scope = 'openid email profile';
+         const responseType = 'code';
+
+         const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+         
+         window.location.href = url;
+      },
+
       async signin(event) {
          event.preventDefault()
          console.log(`Signin in with data: ${ this.formData }, please wait...`)
          this.loading = true
 
          try {
-            const res = await fetch('http://localhost:3000/login-auth', {
+            const res = await fetch('http://135.148.24.68:3000/login-auth', {
                method: 'POST',
                headers: {
                   'Content-Type': 'application/json',
@@ -42,14 +62,24 @@ export default {
                body: JSON.stringify(this.formData)
             })
 
-            const user = await res.json()
-            console.log(user)  
-            localStorage.setItem('userData', user)
-            this.$router.push('/dashboard') 
+            if (res.status == 401) {
+               this.$router.push('/not-verified')
+            }
+
+            if(res.status == 200) {
+               const user = await res.json()
+               console.log('setting user in local storage as', user)  
+               localStorage.setItem('userData', user.token)
+               this.$router.push('/dashboard')                
+            }
+
+            else {
+               throw new Error(res.message)
+            }
 
          } catch (error) {
             console.log(error)
-            this.errorMessage = "login failed, try again"
+            this.errorMessage = error
             this.errorVisible = true
             this.loading = false
          }
@@ -82,7 +112,7 @@ export default {
                <input type="checkbox" class="form-checkbox text-purple-600">
                <span class="ml-2 text-gray-700">Remember Me</span>
                </label>
-               <a href="#" class="text-purple-600 hover:underline">Forgot Password?</a>
+               <a href="/reset-password" class="text-purple-600 hover:underline">Forgot Password?</a>
             </div>
 
             <button v-if="loading" class="w-full bg-purple-400 text-white py-2 rounded-lg transition duration-200">
@@ -91,7 +121,13 @@ export default {
             <button v-else class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-200">
                Login
             </button>
+            <div>
 
+            <button @click="redirectToGoogleOAuth" class="flex justify-center items-center w-full px-4 py-2 my-2 bg-blue-400 text-white font-bold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
+               <img src="https://pluspng.com/img-png/google-logo-png-open-2000.png" alt="Google Logo" class="h-6 me-3"/>
+               Sign in with Google
+            </button>
+         </div>
          </form>
 
          <p class="text-center text-gray-600 mt-6">New on our platform? <a href="/signup" class="text-purple-600 hover:underline">Create an account</a></p>
